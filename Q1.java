@@ -83,25 +83,47 @@ public class Q1 {
         return res;
     }
 
-    private static void timeDfs(int[][] g, int n, boolean[] v, Map<Integer, Integer> t, int[] c) {
-        v[n] = true;
-        for (int adj : g[n])
-            if (!v[adj]) timeDfs(g, adj, v, t, c);
-        t.put(n, ++c[0]);
+    private static void timeDfs(int[][] g, int u, boolean[] vis,
+                            Map<Integer, Integer> times, int[] time) {
+    vis[u] = true;
+
+    // temps à l'ENTRÉE du nœud
+    time[0]++;
+
+    // explorer les voisins
+    for (int v : g[u]) {
+        if (!vis[v]) {
+            timeDfs(g, v, vis, times, time);
+        }
     }
+
+    // temps à la SORTIE du nœud
+    time[0]++;
+    times.put(u, time[0]);
+}
 
     private static void getDeps(int[][] g, int n, Set<Integer> d) {
         for (int v : g[n])
             if (d.add(v)) getDeps(g, v, d);
     }
 
-    private static int longestDfs(int[][] g, int n, int[] memo) {
-        if (memo[n] != -1) return memo[n];
-        int best = 0;
-        for (int v : g[n])
-            best = Math.max(best, longestDfs(g, v, memo));
-        return memo[n] = best + 1;
+   private static int longestDfs(int[][] g, int node, boolean[] onPath) {
+    if (onPath[node]) {
+        // on a déjà ce nœud dans le chemin courant → éviter le cycle
+        return 0;
     }
+
+    onPath[node] = true;
+    int best = 1; // au moins ce nœud lui-même
+
+    for (int v : g[node]) {
+        int candidate = 1 + longestDfs(g, v, onPath);
+        if (candidate > best) best = candidate;
+    }
+
+    onPath[node] = false; // backtracking
+    return best;
+}
 
     /* ==========================
        MÉTHODES PUBLIQUES EN BAS
@@ -169,11 +191,20 @@ public class Q1 {
     public static List<Integer> findBridgeNodes(int[][] g) {
     List<List<Integer>> scc = stronglyConnectedComponents(g);
 
-    // retirer la dernière CFC (= celle contenant le plus petit élément)
-    List<Integer> res = new ArrayList<>();
+    // Si plusieurs composantes ont taille > 1 ---> aucun nœud pont
+    int countBig = 0;
+    for (List<Integer> comp : scc) {
+        if (comp.size() > 1) countBig++;
+    }
+    if (countBig > 1) return new ArrayList<>();
 
-    for (int i = 0; i < scc.size() - 1; i++) {
-        res.addAll(scc.get(i));
+    // Sinon : nœuds qui ne sont pas dans la dernière CFC
+    List<Integer> last = scc.get(scc.size() - 1);
+    Set<Integer> keep = new HashSet<>(last);
+
+    List<Integer> res = new ArrayList<>();
+    for (int i = 0; i < g.length; i++) {
+        if (!keep.contains(i)) res.add(i);
     }
 
     Collections.sort(res);
@@ -181,13 +212,22 @@ public class Q1 {
 }
 
     public static Map<Integer, Integer> getFinishingTimes(int[][] g) {
-        Map<Integer, Integer> times = new HashMap<>();
-        boolean[] vis = new boolean[g.length];
-        int[] counter = {0};
-        for (int i = 0; i < g.length; i++)
-            if (!vis[i]) timeDfs(g, i, vis, times, counter);
-        return times;
+    // LinkedHashMap pour garder les clés dans l'ordre d'insertion (0,1,2,3,…)
+    Map<Integer, Integer> times = new LinkedHashMap<>();
+    boolean[] vis = new boolean[g.length];
+    int[] time = {0}; // compteur global
+
+    // On fait le DFS dans l'ordre 0,1,2,3 comme dans l'énoncé
+    for (int i = 0; i < g.length; i++) {
+        if (!vis[i]) {
+            timeDfs(g, i, vis, times, time);
+        }
     }
+
+    return times;
+}
+
+
 
     public static boolean canInstallAll(int[][] g, List<Integer> broken) {
         if (hasCycle(g)) return false;
@@ -208,21 +248,31 @@ public class Q1 {
 }
 
     public static int longestDependencyChain(int[][] g) {
-        int[] memo = new int[g.length];
-        Arrays.fill(memo, -1);
-        int best = 0;
-        for (int i = 0; i < g.length; i++)
-            best = Math.max(best, longestDfs(g, i, memo));
-        return best;
-    }
+    int n = g.length;
+    if (n == 0) return 0;
 
-    public static List<Integer> findAllSourceNodes(int[][] g) {
-        int[] indegree = new int[g.length];
-        for (int i = 0; i < g.length; i++)
-            for (int v : g[i]) indegree[v]++;
-        List<Integer> out = new ArrayList<>();
-        for (int i = 0; i < g.length; i++)
-            if (indegree[i] == 0) out.add(i);
-        return out;
+    boolean[] onPath = new boolean[n];
+    int max = 0;
+
+    for (int i = 0; i < n; i++) {
+        int len = longestDfs(g, i, onPath);
+        if (len > max) max = len;
     }
+    return max;
+}
+   public static List<Integer> findAllSourceNodes(int[][] g) {
+    int n = g.length;
+    int[] indegree = new int[n];
+
+    for (int i = 0; i < n; i++)
+        for (int v : g[i])
+            indegree[v]++;
+
+    List<Integer> sources = new ArrayList<>();
+    for (int i = 0; i < n; i++)
+        if (indegree[i] == 0)
+            sources.add(i);
+
+    return sources;
+}
 }
