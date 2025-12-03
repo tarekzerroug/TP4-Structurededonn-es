@@ -1,3 +1,37 @@
+/*
+ * A T T E S T A T I O N   D ’ I N T É G R I T É   A C A D É M I Q U E
+ *
+ * [ ] Je certifie n’avoir utilisé aucun outil d’IA générative
+ *     pour résoudre ce problème.
+ *
+ * [ oui] J’ai utilisé un ou plusieurs outils d’IA générative.
+ *     Détails ci-dessous :
+ *
+ * Outil(s) utilisé(s) :
+ * chat gpt 
+ *
+ * Raison(s) de l’utilisation :
+ * écriture d'une partie de la documentaiton / commentaire , 
+ * comprèhension du probleme 
+ *
+ * 
+ *
+ * Parties du code affectées :
+ * 
+ *Aucune
+ * 
+ */
+
+
+
+
+
+
+
+
+
+
+
 import java.util.*;
 
 public class Q3 {
