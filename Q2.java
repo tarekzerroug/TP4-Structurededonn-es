@@ -96,56 +96,58 @@ public class Q2 {
 
 
     private void fixInsert(RBNode node) {
-        RBNode parent = node.parent;
-        if (parent.parent == null) return;
-        RBNode grandParent = parent.parent;
+    RBNode parent = node.parent;
+    if (parent.parent == null) return;
+    RBNode grandParent = parent.parent;
 
-        RBNode uncle = null;
-
-        if (!isRight(parent)) {
-            uncle = grandParent.right;
-        } else {
-            uncle = grandParent.left;
-        }
-
-        if (parent.isRed) {
-            if (uncle == null || !uncle.isRed) {
-                if (!isRight(node)) {
-                    if (!isRight(parent)) {
-                        rotateRight(grandParent);
-                    }
-                    else {
-                        rotateRight(parent);
-                        rotateLeft(grandParent);
-                    }
-                }
-                else {
-                    if (!isRight(parent)) {
-                        rotateLeft(parent);
-                        rotateRight(grandParent);
-                    }
-                    else {
-                        rotateLeft(grandParent);
-                        grandParent.isRed = true;
-                        parent.isRed = false;
-                    }                    
-                }
-                grandParent.isRed = true;
-                parent.isRed = false;
-            }
-            else {
-                parent.isRed = false;
-                uncle.isRed = false;
-                grandParent.isRed = true;
-                root.isRed = false;
-                fixInsert(parent);
-            }
-        }
-
-        root.isRed = false;
+    RBNode uncle = null;
+    if (!isRight(parent)) {
+        uncle = grandParent.right;
+    } else {
+        uncle = grandParent.left;
     }
 
-    private void rotateRight(RBNode grandParent) {
+    if (parent.isRed) {
+        if (uncle == null || !uncle.isRed) {
+            RBNode newRoot = null;  // to store the root of the rotated subtree
+            if (!isRight(node)) {
+                if (!isRight(parent)) {
+                    // LL case
+                    newRoot = rotateRight(grandParent);
+                } else {
+                    // LR case
+                    rotateLeft(parent);
+                    newRoot = rotateRight(grandParent);
+                }
+            } else {
+                if (!isRight(parent)) {
+                    // RL case
+                    rotateRight(parent);
+                    newRoot = rotateLeft(grandParent);
+                } else {
+                    // RR case
+                    newRoot = rotateLeft(grandParent);
+                }
+            }
+            // Proper recoloring after rotation
+            newRoot.isRed = false;
+            if (newRoot.left != null) newRoot.left.isRed = true;
+            if (newRoot.right != null) newRoot.right.isRed = true;
+        } else {
+            // Uncle is red → recolor and propagate fix
+            parent.isRed = false;
+            uncle.isRed = false;
+            grandParent.isRed = true;
+            root.isRed = false;
+            fixInsert(grandParent);  // propagate up
+        }
+    }
+
+    root.isRed = false;  // always ensure root is black
+}
+
+
+    private RBNode rotateRight(RBNode grandParent) {
         RBNode parent = grandParent.left;          
         RBNode temp = parent.right;                
 
@@ -164,9 +166,11 @@ public class Q2 {
 
         grandParent.left = temp;
         if(temp != null) temp.parent = grandParent;
+
+        return parent;
     }
 
-    private void rotateLeft(RBNode grandParent) {
+    private RBNode rotateLeft(RBNode grandParent) {
         RBNode parent = grandParent.right;
         RBNode temp = parent.left;
 
@@ -185,6 +189,8 @@ public class Q2 {
 
         grandParent.right = temp;
         if (temp != null) temp.parent = grandParent;
+
+        return parent;
     }
 
 
