@@ -40,7 +40,8 @@ public class main {
             {1, 2}  // 3 → 1 et 2
         };
 
-        System.out.println("------------------------------" );
+
+
         System.out.println("===== Exemple 2 : Graphe avec cycle =====");
 
         System.out.println("hasCycle(graph) -> " + Q1.hasCycle(graph2));
@@ -85,5 +86,43 @@ public class main {
         System.out.println("findAllSourceNodes(graph) -> " +
                 Q1.findAllSourceNodes(graph3));    
    
-        }
-}
+
+                      System.out.println("----------EXERCICE3----------" );
+        
+        System.out.println("===== Exemple 1 =====");
+        int[][] g1 = {
+            {2,5},
+            {3},
+            {0,4,5},
+            {1,4,5},
+            {2,3},
+            {0,2,3}
+        };
+
+        System.out.println("gameResult → " + Q3.gameResult(g1));
+        System.out.println("getMouseWinningMoves → " + Q3.getMouseWinningMoves(g1));
+        System.out.println("minMovesToWin(mouse) → " + Q3.minMovesToWin(g1,1));
+        System.out.println("minMovesToWin(cat) → " + Q3.minMovesToWin(g1,2));
+        System.out.println("findSafeNodes → " + Q3.findSafeNodes(g1));
+
+        System.out.println("\n===== Exemple 2 =====");
+        int[][] g2 = {
+            {1,3},
+            {0},
+            {3},
+            {0,2}
+        };
+
+        System.out.println("gameResult → " + Q3.gameResult(g2));
+        System.out.println("getMouseWinningMoves → " + Q3.getMouseWinningMoves(g2));
+        System.out.println("minMovesToWin(mouse) → " + Q3.minMovesToWin(g2,1));
+        System.out.println("minMovesToWin(cat) → " + Q3.minMovesToWin(g2,2));
+        System.out.println("gameResultFrom(1,3,true) → " + Q3.gameResultFrom(g2,1,3,true));
+        System.out.println("gameResultFrom(1,3,false) → " + Q3.gameResultFrom(g2,3,2,false));
+        System.out.println("findSafeNodes → " + Q3.findSafeNodes(g2));
+    }
+        
+        
+                    }
+
+
