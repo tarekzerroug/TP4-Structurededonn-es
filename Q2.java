@@ -436,8 +436,46 @@ public class Q2 {
     }
 
     public boolean verifyProperties() {
-        // TODO:
-        return false;
+        if (root.isRed) {
+            return false;
+        }
+
+        return verifyDoubleRed(root) && verifyBlackHeight(root) != 0;
+    }
+
+    boolean verifyDoubleRed(RBNode node) {
+        if (node == null) {
+            return true;
+        }
+
+        if (node.isRed) {
+            if (node.parent != null && node.parent.isRed) {
+                return false;
+            }
+        }
+
+        return verifyDoubleRed(node.left) && verifyDoubleRed(node.right);
+    }
+
+    int verifyBlackHeight(RBNode node) {
+        if (node == null) {
+            return 1;
+        }
+
+        if (verifyBlackHeight(node.left) == 0){
+            return 0;
+        }
+
+        if (verifyBlackHeight(node.right) == 0){
+            return 0;
+        }
+
+        if (verifyBlackHeight(node.left) != verifyBlackHeight(node.right)) {
+            return 0;
+        }
+
+        if (node.isRed) return verifyBlackHeight(node.left);
+        return 1 + verifyBlackHeight(node.left);
     }
 
     public List<Integer> getMostAccessedKeys(int k) {

@@ -7,7 +7,7 @@ public class Q2test {
         testDelete();
         testRangeValues();
         testBlackHeight();
-        //testVerifyProperties();
+        testVerifyProperties();
         //testMostAccessedKeys();
         //testEvictOldEntries();
         //testCountRedNodes();
