@@ -404,8 +404,21 @@ public class Q2 {
     }
 
     public List<String> getRangeValues(int minKey, int maxKey) {
-        // TODO:
-        return new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
+        RBNode current = root;
+        addToList(current, values, minKey, maxKey);
+        return values;
+    }
+
+    private void addToList(RBNode node, List<String> values, int minKey, int maxKey) {
+        if (node == null) return;
+        if (node.key < minKey) {
+            addToList(node.right, values, minKey, maxKey);
+            return;
+        }
+        addToList(node.left, values, minKey, maxKey);
+        values.add(node.value);
+        addToList(node.right, values, minKey, maxKey);
     }
 
     public int getBlackHeight() {

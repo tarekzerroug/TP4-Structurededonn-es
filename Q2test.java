@@ -5,7 +5,7 @@ public class Q2test {
         
         testInsertAndGet();
         testDelete();
-        //testRangeValues();
+        testRangeValues();
         //testBlackHeight();
         //testVerifyProperties();
         //testMostAccessedKeys();
