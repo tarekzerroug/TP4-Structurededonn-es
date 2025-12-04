@@ -512,8 +512,13 @@ public class Q2 {
     }
 
     public int countRedNodes() {
-        // TODO:
-        return 0;
+        return countRedRecursion(root);
+    }
+
+    int countRedRecursion(RBNode node) {
+        if (node == null) return 0;
+        if (node.isRed) return 1 + countRedRecursion(node.left) + countRedRecursion(node.right);
+        return countRedRecursion(node.left) + countRedRecursion(node.right);
     }
 
     public Map<String, Integer> getColorStatisticsByLevel() {
