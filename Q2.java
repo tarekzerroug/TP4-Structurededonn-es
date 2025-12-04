@@ -96,44 +96,45 @@ public class Q2 {
 
 
     private void fixInsert(RBNode node) {
-        RBNode parent = node.parent;
-        if (parent.parent == null) return;
-        RBNode grandParent = parent.parent;
+        while (node != root && node.isRed && node.parent.isRed) {
+            RBNode parent = node.parent;
+            RBNode grandParent = parent.parent;
 
-        RBNode uncle = null;
-        if (!isRight(parent)) {
-            uncle = grandParent.right;
-        } else {
-            uncle = grandParent.left;
-        }
-
-        if (parent.isRed) {
-            if (uncle == null || !uncle.isRed) {
-                RBNode newRoot = null;
-                if (!isRight(node)) {
-                    if (!isRight(parent)) {
-                        newRoot = rotateRight(grandParent);
-                    } else {
-                        rotateLeft(parent);
-                        newRoot = rotateRight(grandParent);
-                    }
-                } else {
-                    if (!isRight(parent)) {
-                        rotateRight(parent);
-                        newRoot = rotateLeft(grandParent);
-                    } else {
-                        newRoot = rotateLeft(grandParent);
-                    }
-                }
-                newRoot.isRed = false;
-                if (newRoot.left != null) newRoot.left.isRed = true;
-                if (newRoot.right != null) newRoot.right.isRed = true;
+            RBNode uncle = null;
+            if (!isRight(parent)) {
+                uncle = grandParent.right;
             } else {
-                parent.isRed = false;
-                uncle.isRed = false;
-                grandParent.isRed = true;
-                root.isRed = false;
-                fixInsert(grandParent); 
+                uncle = grandParent.left;
+            }
+
+            if (parent.isRed) {
+                if (uncle == null || !uncle.isRed) {
+                    RBNode newRoot = null;
+                    if (!isRight(node)) {
+                        if (!isRight(parent)) {
+                            newRoot = rotateRight(grandParent);
+                        } else {
+                            rotateLeft(parent);
+                            newRoot = rotateRight(grandParent);
+                        }
+                    } else {
+                        if (!isRight(parent)) {
+                            rotateRight(parent);
+                            newRoot = rotateLeft(grandParent);
+                        } else {
+                            newRoot = rotateLeft(grandParent);
+                        }
+                    }
+                    newRoot.isRed = false;
+                    if (newRoot.left != null) newRoot.left.isRed = true;
+                    if (newRoot.right != null) newRoot.right.isRed = true;
+                } else {
+                    parent.isRed = false;
+                    uncle.isRed = false;
+                    grandParent.isRed = true;
+                    root.isRed = false;
+                    fixInsert(grandParent); 
+                }
             }
         }
 
@@ -228,12 +229,27 @@ public class Q2 {
         }
 
         if(node.left == null && node.right == null) {
-            if (isRight(node)) {
-                node.parent.right = null;
+            if (node.isRed) {
+                if (node == root) {
+                    root = null;
+                } else if (isRight(node)) {
+                    node.parent.right = null;
+                } else {
+                    node.parent.left = null;
+                }
                 return true;
             }
             else {
-                node.parent.left = null;
+                if (node == root) {
+                    root = null;
+                    return true;
+                }
+                fixDelete(node);
+                if (isRight(node)) {
+                    node.parent.right = null;
+                } else {
+                    node.parent.left = null;
+                }
                 return true;
             }
         }
@@ -246,51 +262,145 @@ public class Q2 {
             }
             if(node == root) {
                 root = child;
-                if (child != null) child.parent = null;
+                if (child != null) {
+                    child.parent = null;
+                    child.isRed = false;
+                }
                 return true;
             }
             else if (isRight(node)) {
                 node.parent.right = child;
                 child.parent = node.parent;
-                return true;
             }
             else {
                 node.parent.left = child;
                 child.parent = node.parent;
-                return true;
             }
+            
+            if (!node.isRed && child.isRed) {
+                child.isRed = false;
+            }
+            
+            return true;
         }
         else {
             RBNode predecessor = node.left;
             while (predecessor.right != null) {
                 predecessor = predecessor.right;
             }
-            if(predecessor.isRed == node.isRed) {
-                replace(node, predecessor);
-                if (predecessor.parent == node) {
-                    if(predecessor.left == null) {
+                        
+            node.key = predecessor.key;
+            node.value = predecessor.value;
+            node.accessCount = predecessor.accessCount;
+            node.lastAccessTime = predecessor.lastAccessTime;
+            
+            if (predecessor.left == null) {
+                if (predecessor.isRed) {
+                    if (predecessor.parent == node) {
                         node.left = null;
                     } else {
-                        predecessor.left.parent = node;
-                        node.left = predecessor.left;
+                        predecessor.parent.right = null;
+                    }
+                } else {
+                    fixDelete(predecessor);
+                    if (predecessor.parent == node) {
+                        node.left = null;
+                    } else {
+                        predecessor.parent.right = null;
                     }
                 }
-                else {
-                    predecessor.parent.right = null;
-                }
             } else {
+                RBNode child = predecessor.left;
+                if (predecessor.parent == node) {
+                    node.left = child;
+                } else {
+                    predecessor.parent.right = child;
+                }
+                child.parent = predecessor.parent;
                 
+                if (!predecessor.isRed && child.isRed) {
+                    child.isRed = false;
+                }
             }
+            
             return true;
         }
     }
 
-    public void replace(RBNode node1, RBNode node2) {
-        node1.key = node2.key;
-        node1.value = node2.value;
-        node1.isRed = node2.isRed;
-        node1.accessCount = node2.accessCount;
-        node1.lastAccessTime = node2.lastAccessTime;
+    private void fixDelete(RBNode node) {
+        while (node != root) {
+            RBNode parent = node.parent;
+            RBNode sibling;
+            boolean nodeIsRight = isRight(node);
+            
+            if (nodeIsRight) {
+                sibling = parent.left;
+            } else {
+                sibling = parent.right;
+            }
+            
+            if (sibling != null && sibling.isRed) {
+                sibling.isRed = false;
+                parent.isRed = true;
+                if (nodeIsRight) {
+                    rotateRight(parent);
+                    sibling = parent.left;
+                } else {
+                    rotateLeft(parent);
+                    sibling = parent.right;
+                }
+            }
+            
+            if (sibling == null) {
+                node = parent;
+                continue;
+            }
+            
+            boolean siblingLeftRed = (sibling.left != null && sibling.left.isRed);
+            boolean siblingRightRed = (sibling.right != null && sibling.right.isRed);
+            
+            if (!siblingLeftRed && !siblingRightRed) {
+                sibling.isRed = true;
+                if (parent.isRed) {
+                    parent.isRed = false;
+                    break;
+                } else {
+                    node = parent;
+                    continue;
+                }
+            }
+            
+            if (nodeIsRight) {
+                if (siblingLeftRed) {
+                    RBNode newRoot = rotateRight(parent);
+                    newRoot.isRed = parent.isRed;
+                    parent.isRed = false;
+                    if (newRoot.left != null) newRoot.left.isRed = false;
+                } else {
+                    sibling.right.isRed = false;
+                    sibling.isRed = true;
+                    rotateLeft(sibling);
+                    RBNode newRoot = rotateRight(parent);
+                    newRoot.isRed = parent.isRed;
+                    parent.isRed = false;
+                }
+            } else {
+                if (siblingRightRed) {
+                    RBNode newRoot = rotateLeft(parent);
+                    newRoot.isRed = parent.isRed;
+                    parent.isRed = false;
+                    if (newRoot.right != null) newRoot.right.isRed = false;
+                } else {
+                    sibling.left.isRed = false;
+                    sibling.isRed = true;
+                    rotateRight(sibling);
+                    RBNode newRoot = rotateLeft(parent);
+                    newRoot.isRed = parent.isRed;
+                    parent.isRed = false;
+                }
+            }
+            break;
+        }
     }
 
     public List<String> getRangeValues(int minKey, int maxKey) {
