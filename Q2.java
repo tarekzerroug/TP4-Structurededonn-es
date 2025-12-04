@@ -189,7 +189,21 @@ public class Q2 {
 
 
     public String get(int key, long timestamp) {
-        // TODO:
+        RBNode current = root;
+
+        while (current != null) {
+            if (key == current.key) {
+                current.accessCount++;
+                current.lastAccessTime = timestamp;
+                return current.value;
+            }
+            if (key < current.key) {
+                current = current.left;
+            }
+            else {
+                current = current.right;
+            }
+        }
         return null;
     }
 
