@@ -480,7 +480,7 @@ public class Q2 {
 
     public List<Integer> getMostAccessedKeys(int k) {
         List<RBNode> top = new ArrayList<>();
-        accessedNodes(root, top);
+        allNodes(root, top);
         top.sort((a,b) -> Integer.compare(b.accessCount, a.accessCount));
         List<Integer> keys = new ArrayList<>();
         for (RBNode n : top) {
@@ -492,17 +492,23 @@ public class Q2 {
         return keys;
     }
 
-    void accessedNodes(RBNode node, List<RBNode> list) {
+    void allNodes(RBNode node, List<RBNode> list) {
         if (node == null) {
             return;
         }
         list.add(node);
-        accessedNodes(node.left, list);
-        accessedNodes(node.right, list);
+        allNodes(node.left, list);
+        allNodes(node.right, list);
     }
 
     public void evictOldEntries(long newNodeTime, long maxAge) {
-        // TODO:
+        List<RBNode> nodes = new ArrayList<>();
+        allNodes(root, nodes);
+        for(RBNode node : nodes) {
+            if (newNodeTime - node.lastAccessTime > maxAge) {
+                delete(node.key);
+            }
+        }
     }
 
     public int countRedNodes() {
