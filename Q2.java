@@ -422,8 +422,17 @@ public class Q2 {
     }
 
     public int getBlackHeight() {
-        // TODO:
-        return 0;
+        return heightHelp(root);
+    }
+
+    int heightHelp(RBNode node) {
+        if (node == null) {
+            return 0;
+        }
+        if (node.isRed) {
+            return Math.max(heightHelp(node.left), heightHelp(node.right));
+        }
+        return 1 + Math.max(heightHelp(node.left), heightHelp(node.right));
     }
 
     public boolean verifyProperties() {
