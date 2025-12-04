@@ -42,7 +42,7 @@ public class Q2 {
         public RBNode(int key, String value, long timestamp) {
             this.key = key;
             this.value = value;
-            this.isRed = RED;
+            this.isRed = true;
             this.accessCount = 1;
             this.lastAccessTime = timestamp;
         }
@@ -187,7 +187,6 @@ public class Q2 {
         return parent;
     }
 
-
     public String get(int key, long timestamp) {
         RBNode current = root;
 
@@ -208,8 +207,90 @@ public class Q2 {
     }
 
     public boolean delete(int key) {
-        // TODO:
-        return false;
+        RBNode current = root;
+        RBNode node = null;
+
+        while (current != null) {
+            if (key == current.key) {
+                node = current;
+                break;
+            }
+            if (key < current.key) {
+                current = current.left;
+            }
+            else {
+                current = current.right;
+            }
+        }
+
+        if (node == null){
+            return false;
+        }
+
+        if(node.left == null && node.right == null) {
+            if (isRight(node)) {
+                node.parent.right = null;
+                return true;
+            }
+            else {
+                node.parent.left = null;
+                return true;
+            }
+        }
+        else if (node.left == null ^ node.right == null) {
+            RBNode child;
+            if (node.left == null) {
+                child = node.right;
+            } else {
+                child = node.left;
+            }
+            if(node == root) {
+                root = child;
+                if (child != null) child.parent = null;
+                return true;
+            }
+            else if (isRight(node)) {
+                node.parent.right = child;
+                child.parent = node.parent;
+                return true;
+            }
+            else {
+                node.parent.left = child;
+                child.parent = node.parent;
+                return true;
+            }
+        }
+        else {
+            RBNode predecessor = node.left;
+            while (predecessor.right != null) {
+                predecessor = predecessor.right;
+            }
+            if(predecessor.isRed == node.isRed) {
+                replace(node, predecessor);
+                if (predecessor.parent == node) {
+                    if(predecessor.left == null) {
+                        node.left = null;
+                    } else {
+                        predecessor.left.parent = node;
+                        node.left = predecessor.left;
+                    }
+                }
+                else {
+                    predecessor.parent.right = null;
+                }
+            } else {
+                
+            }
+            return true;
+        }
+    }
+
+    public void replace(RBNode node1, RBNode node2) {
+        node1.key = node2.key;
+        node1.value = node2.value;
+        node1.isRed = node2.isRed;
+        node1.accessCount = node2.accessCount;
+        node1.lastAccessTime = node2.lastAccessTime;
     }
 
     public List<String> getRangeValues(int minKey, int maxKey) {
