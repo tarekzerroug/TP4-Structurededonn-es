@@ -11,7 +11,7 @@ public class Q2test {
         testMostAccessedKeys();
         testEvictOldEntries();
         testCountRedNodes();
-        //testColorStatisticsByLevel();
+        testColorStatisticsByLevel();
         
         System.out.println("\n=== ALL TESTS COMPLETED ===");
     }

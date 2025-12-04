@@ -522,8 +522,41 @@ public class Q2 {
     }
 
     public Map<String, Integer> getColorStatisticsByLevel() {
-        // TODO:
-        return new HashMap<>();
+        Map<String, Integer> stats = new HashMap<>();
+        
+        if (root == null) {
+            return stats;  // Empty tree
+        }
+        
+        Queue<RBNode> queue = new LinkedList<>();
+        queue.offer(root);
+        int level = 0;
+        
+        while (!queue.isEmpty()) {
+            int levelSize = queue.size();
+            int redCount = 0;
+            
+            for (int i = 0; i < levelSize; i++) {
+                RBNode node = queue.poll();
+                
+                if (node.isRed) {
+                    redCount++;
+                }
+                
+                if (node.left != null) {
+                    queue.offer(node.left);
+                }
+                if (node.right != null) {
+                    queue.offer(node.right);
+                }
+            }
+            
+            stats.put(String.valueOf(level), redCount);
+            
+            level++;
+        }
+        
+        return stats;
     }
 
 }
