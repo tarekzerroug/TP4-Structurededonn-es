@@ -1,16 +1,16 @@
 /*
- * A T T E S T A T I O N   D ’ I N T É G R I T É   A C A D É M I Q U E
+ * A T T E S T A T I O N   D ' I N T É G R I T É   A C A D É M I Q U E
  *
- * [ ] Je certifie n’avoir utilisé aucun outil d’IA générative
+ * [ ] Je certifie n'avoir utilisé aucun outil d'IA générative
  *     pour résoudre ce problème.
  *
- * [ oui] J’ai utilisé un ou plusieurs outils d’IA générative.
+ * [ oui] J'ai utilisé un ou plusieurs outils d'IA générative.
  *     Détails ci-dessous :
  *
  * Outil(s) utilisé(s) :
  * chat gpt, Claude 
  *
- * Raison(s) de l’utilisation :
+ * Raison(s) de l'utilisation :
  * Tests, 
  * commentaires
  *
@@ -54,16 +54,19 @@ public class Q2 {
         this.root = null;
     }
 
+    // Insère une nouvelle paire clé-valeur dans l'arbre
+    // Met à jour si la clé existe déjà
     public void insert(int key, String value, long timestamp) {
         if (root == null) {
             root = new RBNode(key, value, timestamp);
-            root.isRed = false;
+            root.isRed = false;  // La racine doit être noire
             return;
         }
 
         RBNode newNode = root;
         RBNode parent = null;
 
+        // Recherche de la position d'insertion (comme un ABR standard)
         while (newNode != null) {
             parent = newNode;
             if (key < newNode.key) {
@@ -71,12 +74,14 @@ public class Q2 {
             } else if (key > newNode.key) {
                 newNode = newNode.right;
             } else {
+                // Clé existe déjà, mise à jour
                 newNode.value = value;
                 newNode.accessCount++;
                 newNode.lastAccessTime = timestamp;
                 return;
             }
         }
+        
         newNode = new RBNode(key, value, timestamp);
         newNode.isRed = true;
         newNode.parent = parent;
@@ -90,17 +95,19 @@ public class Q2 {
         fixInsert(newNode);
     }
 
+    // Vérifie si un nœud est l'enfant droit de son parent
     private boolean isRight(RBNode node) {
         return node.parent != null && node == node.parent.right;
     }
 
-
+    // Corrige les violations des propriétés rouge-noir après insertion
+    // Gère les cas de double rouge
     private void fixInsert(RBNode node) {
         while (node != root && node.isRed && node.parent.isRed) {
             RBNode parent = node.parent;
             RBNode grandParent = parent.parent;
 
-            RBNode uncle = null;
+            RBNode uncle;
             if (!isRight(parent)) {
                 uncle = grandParent.right;
             } else {
@@ -108,8 +115,9 @@ public class Q2 {
             }
 
             if (parent.isRed) {
+                // Cas 1 : Oncle noir - restructuration nécessaire
                 if (uncle == null || !uncle.isRed) {
-                    RBNode newRoot = null;
+                    RBNode newRoot;
                     if (!isRight(node)) {
                         if (!isRight(parent)) {
                             newRoot = rotateRight(grandParent);
@@ -129,6 +137,7 @@ public class Q2 {
                     if (newRoot.left != null) newRoot.left.isRed = true;
                     if (newRoot.right != null) newRoot.right.isRed = true;
                 } else {
+                    // Cas 2 : Oncle rouge - recoloration
                     parent.isRed = false;
                     uncle.isRed = false;
                     grandParent.isRed = true;
@@ -141,7 +150,8 @@ public class Q2 {
         root.isRed = false;
     }
 
-
+    // Effectue une rotation simple à droite
+    // Utilisée pour rééquilibrer l'arbre
     private RBNode rotateRight(RBNode grandParent) {
         RBNode parent = grandParent.left;          
         RBNode temp = parent.right;                
@@ -165,6 +175,8 @@ public class Q2 {
         return parent;
     }
 
+    // Effectue une rotation simple à gauche
+    // Utilisée pour rééquilibrer l'arbre
     private RBNode rotateLeft(RBNode grandParent) {
         RBNode parent = grandParent.right;
         RBNode temp = parent.left;
@@ -188,6 +200,8 @@ public class Q2 {
         return parent;
     }
 
+    // Recherche et retourne la valeur associée à une clé
+    // Met à jour les statistiques d'accès
     public String get(int key, long timestamp) {
         RBNode current = root;
 
@@ -207,10 +221,12 @@ public class Q2 {
         return null;
     }
 
+    // Supprime un nœud de l'arbre tout en maintenant les propriétés rouge-noir
     public boolean delete(int key) {
         RBNode current = root;
         RBNode node = null;
 
+        // Recherche du nœud à supprimer
         while (current != null) {
             if (key == current.key) {
                 node = current;
@@ -228,6 +244,7 @@ public class Q2 {
             return false;
         }
 
+        // Cas 1 : Nœud feuille
         if(node.left == null && node.right == null) {
             if (node.isRed) {
                 if (node == root) {
@@ -253,6 +270,7 @@ public class Q2 {
                 return true;
             }
         }
+        // Cas 2 : Nœud avec un seul enfant
         else if (node.left == null ^ node.right == null) {
             RBNode child;
             if (node.left == null) {
@@ -283,12 +301,15 @@ public class Q2 {
             
             return true;
         }
+        // Cas 3 : Nœud avec deux enfants
         else {
+            // Trouver le prédécesseur (maximum du sous-arbre gauche)
             RBNode predecessor = node.left;
             while (predecessor.right != null) {
                 predecessor = predecessor.right;
             }
-                        
+            
+            // Copier les données du prédécesseur        
             node.key = predecessor.key;
             node.value = predecessor.value;
             node.accessCount = predecessor.accessCount;
@@ -327,6 +348,8 @@ public class Q2 {
         }
     }
 
+    // Corrige les violations des propriétés rouge-noir après suppression
+    // Gère les cas de double noir
     private void fixDelete(RBNode node) {
         while (node != root) {
             RBNode parent = node.parent;
@@ -339,6 +362,7 @@ public class Q2 {
                 sibling = parent.right;
             }
             
+            // Cas 3 : Frère rouge
             if (sibling != null && sibling.isRed) {
                 sibling.isRed = false;
                 parent.isRed = true;
@@ -359,6 +383,7 @@ public class Q2 {
             boolean siblingLeftRed = (sibling.left != null && sibling.left.isRed);
             boolean siblingRightRed = (sibling.right != null && sibling.right.isRed);
             
+            // Cas 2 : Frère noir avec deux enfants noirs
             if (!siblingLeftRed && !siblingRightRed) {
                 sibling.isRed = true;
                 if (parent.isRed) {
@@ -370,6 +395,7 @@ public class Q2 {
                 }
             }
             
+            // Cas 1 : Frère noir avec au moins un enfant rouge
             if (nodeIsRight) {
                 if (siblingLeftRed) {
                     RBNode newRoot = rotateRight(parent);
@@ -403,6 +429,7 @@ public class Q2 {
         }
     }
 
+    // Retourne toutes les valeurs dont les clés sont dans l'intervalle [minKey, maxKey]
     public List<String> getRangeValues(int minKey, int maxKey) {
         ArrayList<String> values = new ArrayList<>();
         RBNode current = root;
@@ -410,6 +437,7 @@ public class Q2 {
         return values;
     }
 
+    // Parcours infixe pour ajouter les valeurs dans l'intervalle à la liste
     private void addToList(RBNode node, List<String> values, int minKey, int maxKey) {
         if (node == null) return;
         if (node.key < minKey) {
@@ -421,10 +449,12 @@ public class Q2 {
         addToList(node.right, values, minKey, maxKey);
     }
 
+    // Calcule la hauteur noire de l'arbre (nombre de nœuds noirs sur un chemin racine-feuille)
     public int getBlackHeight() {
         return heightHelp(root);
     }
 
+    // Fonction récursive pour calculer la hauteur noire
     int heightHelp(RBNode node) {
         if (node == null) {
             return 0;
@@ -435,6 +465,7 @@ public class Q2 {
         return 1 + Math.max(heightHelp(node.left), heightHelp(node.right));
     }
 
+    // Vérifie que l'arbre respecte toutes les propriétés rouge-noir
     public boolean verifyProperties() {
         if (root.isRed) {
             return false;
@@ -443,6 +474,7 @@ public class Q2 {
         return verifyDoubleRed(root) && verifyBlackHeight(root) != 0;
     }
 
+    // Vérifie qu'il n'y a pas de double rouge (nœud rouge avec enfant rouge)
     boolean verifyDoubleRed(RBNode node) {
         if (node == null) {
             return true;
@@ -457,6 +489,7 @@ public class Q2 {
         return verifyDoubleRed(node.left) && verifyDoubleRed(node.right);
     }
 
+    // Vérifie que tous les chemins ont la même hauteur noire
     int verifyBlackHeight(RBNode node) {
         if (node == null) {
             return 1;
@@ -478,6 +511,7 @@ public class Q2 {
         return 1 + verifyBlackHeight(node.left);
     }
 
+    // Retourne les k clés les plus accédées en ordre décroissant de fréquence
     public List<Integer> getMostAccessedKeys(int k) {
         List<RBNode> top = new ArrayList<>();
         allNodes(root, top);
@@ -492,6 +526,7 @@ public class Q2 {
         return keys;
     }
 
+    // Ajoute tous les nœuds de l'arbre à une liste (parcours préfixe)
     void allNodes(RBNode node, List<RBNode> list) {
         if (node == null) {
             return;
@@ -501,6 +536,7 @@ public class Q2 {
         allNodes(node.right, list);
     }
 
+    // Supprime toutes les entrées dont lastAccessTime est trop ancien
     public void evictOldEntries(long newNodeTime, long maxAge) {
         List<RBNode> nodes = new ArrayList<>();
         allNodes(root, nodes);
@@ -511,21 +547,25 @@ public class Q2 {
         }
     }
 
+    // Compte le nombre total de nœuds rouges dans l'arbre
     public int countRedNodes() {
         return countRedRecursion(root);
     }
 
+    // Fonction récursive pour compter les nœuds rouges
     int countRedRecursion(RBNode node) {
         if (node == null) return 0;
         if (node.isRed) return 1 + countRedRecursion(node.left) + countRedRecursion(node.right);
         return countRedRecursion(node.left) + countRedRecursion(node.right);
     }
 
+    // Retourne le nombre de nœuds rouges par niveau de l'arbre
+    // Utilise un parcours en largeur (BFS)
     public Map<String, Integer> getColorStatisticsByLevel() {
         Map<String, Integer> stats = new HashMap<>();
         
         if (root == null) {
-            return stats;  // Empty tree
+            return stats;
         }
         
         Queue<RBNode> queue = new LinkedList<>();
