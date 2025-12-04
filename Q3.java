@@ -22,9 +22,22 @@
  * 
  */
 
+// Réponses aux questions theoriques : 
+
+// 1) Une limite sur le nombre de coup est nécéssaire parce quil ya des cas ou certains graphes feront en sorte
+// que l a souris et le chat comtinueraient à se déplacer indéfinément sans que le chat parvienne à attraper la souris .
+// par exemple la souris tournerait dans un cycle indéfinément et le chat  la poursuivrait sans aucun moyen de forcer la capture . 
+// Sans limite de coups, l’algorithme récursif ne terminerait jamais et ne pourrait pas conclure qu’il s’agit d’un match nul
+
+//2) Un état est défini par la position de la souris (n possibilités), la position du chat (n possibilités) et le tour (2 possibilités)
+// , soit O(2*n**2) soit 0 (n**2)  états au total. Pour chaque état, solve parcourt tous les voisins du nœud courant (souris ou chat), donc un coût O(deg(i)) . puisqe 
+// En envisagant  le pire des cas on a ∑ deg(i) = m   soit la coplexité totale qui vaut 0(n**2+ m)
 
 
-
+//3) Le seul cas où la souris gagne toujours, quel que soit le graphe, est lorsqu’elle commence au nœud 0, 
+// En effet, si elle débute ailleurs, on peut toujours construire un graphe dans lequel le chat peut l’atteindre 
+// avant qu’elle n’atteigne le refuge, ou un graphe où aucun chemin ne mène a 0. Ainsi, la seule situation où la souris
+//  gagne indépendamment de la structure du graphe est celle où sa position initiale est le refuge.
 
 
 
@@ -37,25 +50,25 @@ public class Q3 {
     static final int CAT_WIN = 2;
     static final int DRAW = 0;
 
-    static Map<String,Integer> memo;
+    static Map<String,Integer> visitedStates;
 
     /* ============================================================
        CORE: evaluate() + solve()
        ============================================================ */
 
     public static int evaluate(int[][] g, int mouse, int cat, boolean mouseTurn) {
-        memo = new HashMap<>();
+        visitedStates = new HashMap<>();
         return solve(g, mouse, cat, mouseTurn ? 1 : 2, 0);
     }
 
     private static int solve(int[][] g, int m, int c, int turn, int depth) {
         // Limite anti-boucles
-        if (depth > 4 * g.length * g.length)
+        if (depth > 4 * g.length +200)
             return DRAW;
 
         String key = m + "," + c + "," + turn;
-        if (memo.containsKey(key))
-            return memo.get(key);
+        if (visitedStates.containsKey(key))
+            return visitedStates.get(key);
 
         // États terminaux
         if (m == 0) return MOUSE_WIN;
@@ -64,7 +77,7 @@ public class Q3 {
         int result;
 
         if (turn == 1) {  // souris
-            result = CAT_WIN;  // pessimiste
+            result = CAT_WIN;  
             for (int nxt : g[m]) {
                 int r = solve(g, nxt, c, 2, depth + 1);
                 if (r == MOUSE_WIN) { result = MOUSE_WIN; break; }
@@ -80,12 +93,12 @@ public class Q3 {
             }
         }
 
-        memo.put(key, result);
+        visitedStates.put(key, result);
         return result;
     }
 
     /* ============================================================
-       PARTIE PUBLIQUE (demandée dans le TP)
+       PARTIE PUBLIQUE (demandée dans le T P)
        ============================================================ */
 
     // 1. Résultat du jeu (souris commence au nœud 1, chat au nœud 2)
@@ -108,7 +121,7 @@ public class Q3 {
         int limit = 4 * graph.length * graph.length;
 
         for (int k = 1; k <= limit; k++) {
-            memo = new HashMap<>();
+            visitedStates = new HashMap<>();
             int r = solve(graph, 1, 2, 1, k);
             if (r == player)
                 return k;
@@ -137,7 +150,6 @@ public class Q3 {
         return out;
     }
 
-    // 6. Analyse complète : map (m,c,t) → résultat {0,1,2}
     public static Map<String, Integer> analyzeAllPositions(int[][] graph) {
         Map<String, Integer> out = new HashMap<>();
         for (int m = 1; m < graph.length; m++) {
@@ -167,9 +179,9 @@ public class Q3 {
 
     for (int m = 1; m < graph.length; m++) {
 
-        boolean ok = true;
+                    boolean ok = true;
 
-        for (int c = 1; c < graph.length; c++) {
+                    for (int c = 1; c < graph.length; c++) {
 
             if (c == 0) continue;     // le chat ne peut pas être dans le refuge
             if (c == m) continue;     // position invalide : chat déjà sur la souris
