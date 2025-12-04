@@ -8,17 +8,17 @@
  *     Détails ci-dessous :
  *
  * Outil(s) utilisé(s) :
- * chat gpt 
+ * chat gpt, Claude 
  *
  * Raison(s) de l’utilisation :
- * écriture d'une partie de la documentaiton / commentaire , 
- * comprèhension du probleme 
+ * Tests, 
+ * commentaires
  *
  * 
  *
  * Parties du code affectées :
  * 
- *Aucune
+ * Aucune
  * 
  */
 
@@ -479,8 +479,26 @@ public class Q2 {
     }
 
     public List<Integer> getMostAccessedKeys(int k) {
-        // TODO:
-        return new ArrayList<>();
+        List<RBNode> top = new ArrayList<>();
+        accessedNodes(root, top);
+        top.sort((a,b) -> Integer.compare(b.accessCount, a.accessCount));
+        List<Integer> keys = new ArrayList<>();
+        for (RBNode n : top) {
+            if (top.indexOf(n) >= k) {
+                break;
+            }
+            keys.add(n.key);
+        }
+        return keys;
+    }
+
+    void accessedNodes(RBNode node, List<RBNode> list) {
+        if (node == null) {
+            return;
+        }
+        list.add(node);
+        accessedNodes(node.left, list);
+        accessedNodes(node.right, list);
     }
 
     public void evictOldEntries(long newNodeTime, long maxAge) {
